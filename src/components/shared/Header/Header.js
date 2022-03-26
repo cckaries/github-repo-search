@@ -1,6 +1,3 @@
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import cx from 'classnames';
-
 import styles from './Header.module.scss';
 
 const Header = () => {
