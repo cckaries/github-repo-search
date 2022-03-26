@@ -1,0 +1,11 @@
+.Container {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  font-size: 0.875rem;
+  display: block;
+  min-height: 0;
+  margin: auto 0;
+  max-height: 100%;
+  overflow: auto;
+}
