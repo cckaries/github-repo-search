@@ -4,7 +4,7 @@ import styles from './Tr.module.scss';
 
 const Tr = ({
   id,
-  isHidden = false,
+  isAnimationActive = false,
   isClickable = false,
   customClass = null,
   children = null,
@@ -15,7 +15,7 @@ const Tr = ({
       id={id}
       className={cx(
         styles.Container,
-        isHidden ? styles.hidden : styles.shown,
+        isAnimationActive && styles.animationActive,
         isClickable && styles.clickable,
         customClass
       )}

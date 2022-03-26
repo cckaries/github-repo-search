@@ -17,13 +17,7 @@
     }
   }
 
-  &.hidden {
-    max-height: 0;
-    overflow: hidden;
-    border-width: 0;
-  }
-
-  &.shown {
+  &.animationActive {
     animation: flashAnim 1s ease-out;
   }
 }
