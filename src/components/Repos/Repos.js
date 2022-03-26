@@ -3,8 +3,7 @@ import { useReducer, memo } from 'react';
 import styles from './Repos.module.scss';
 import ReposTable from './ReposTable/ReposTable';
 import Search from '../shared/Search/Search';
-
-let timer;
+import Select from '../shared/Select/Select';
 
 const sortOptions = {
   stars: 'Stars',
@@ -16,6 +15,17 @@ const sortOptions = {
 const orderOptions = {
   desc: 'DESC',
   asc: 'ASC',
+};
+
+let timer;
+
+const debounce = (fn = () => {}, delayMs = 500) => {
+  return (...args) => {
+    if (!!timer) {
+      clearTimeout(timer);
+    }
+    timer = setTimeout(() => fn(...args), delayMs);
+  };
 };
 
 const Repos = memo(
@@ -32,15 +42,6 @@ const Repos = memo(
         updatedAt: null,
       }
     );
-
-    const debounce = (fn = () => {}, delayMs = 500) => {
-      return (...args) => {
-        if (!!timer) {
-          clearTimeout(timer);
-        }
-        timer = setTimeout(() => fn(...args), delayMs);
-      };
-    };
 
     const searchText = async q => {
       const processedQ = q.trim().toLowerCase();
@@ -87,39 +88,6 @@ const Repos = memo(
       }
     };
 
-    const selectDom = ({
-      name = null,
-      id = null,
-      value = '',
-      placeholder = '',
-      options = {},
-      isDefaultChecked = false,
-      isDisabled = false,
-      onChange = () => {},
-    }) => (
-      <select
-        name={name}
-        id={id}
-        value={value}
-        disabled={isDisabled}
-        onChange={onChange}
-      >
-        {!isDefaultChecked && (
-          <option value="">{placeholder || 'Select...'}</option>
-        )}
-        {Object.keys(options).map((optionKey, optionIdx) => (
-          <option
-            key={optionIdx}
-            value={optionKey}
-            checked={optionKey === value}
-            defaultChecked={isDefaultChecked && !optionIdx}
-          >
-            {options[optionKey]}
-          </option>
-        ))}
-      </select>
-    );
-
     return (
       <div id="container" className={styles.Container}>
         <div className={styles.Top}>
@@ -130,23 +98,23 @@ const Repos = memo(
                 debounce(searchText)(e.target.value);
               }}
             />
-            {selectDom({
-              name: 'sort',
-              id: 'search-sort',
-              value: prevSearch.sort,
-              placeholder: 'Sort by...',
-              options: sortOptions,
-              onChange: e => changeSort(e.target.value),
-            })}
-            {selectDom({
-              name: 'order',
-              id: 'search-order',
-              value: prevSearch.order,
-              options: orderOptions,
-              isDefaultChecked: true,
-              isDisabled: !prevSearch.sort,
-              onChange: e => changeOrder(e.target.value),
-            })}
+            <Select
+              name="sort"
+              id="search-sort"
+              value={prevSearch.sort}
+              placeholder={'Sort by...'}
+              options={sortOptions}
+              onChange={e => changeSort(e.target.value)}
+            />
+            <Select
+              name={'order'}
+              id={'search-order'}
+              value={prevSearch.order}
+              options={orderOptions}
+              isDefaultChecked={true}
+              isDisabled={!prevSearch.sort}
+              onChange={e => changeOrder(e.target.value)}
+            />
           </div>
           <div className={styles.Count}>Total: {reposCount}</div>
         </div>

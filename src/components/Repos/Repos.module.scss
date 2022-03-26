@@ -11,23 +11,6 @@
 
   > select {
     margin-left: 1rem;
-    padding: 0 0.5rem;
-    border: 2px solid #b2b2b2;
-    border-radius: 4px;
-    background-color: #f6f6f6;
-    color: #4a4a4a;
-    cursor: pointer;
-
-    &:focus {
-      border-color: #06c;
-    }
-
-    &:disabled {
-      border: 2px solid #dcdddd;
-      background-color: #dcdddd;
-      color: #9b9b9b;
-      cursor: not-allowed;
-    }
   }
 }
 
