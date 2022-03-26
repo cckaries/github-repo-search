@@ -1,10 +1,7 @@
-import { useEffect, useReducer } from 'react';
-
 import styles from './Repos.module.scss';
 import ReposTable from './ReposTable/ReposTable';
 import Search from '../shared/Search/Search';
 
-const specialCharsRegex = /[~`!@#$%^&*()+={}\[\];:\'\"<>.,\/\\\?-_\s]/g;
 let timer;
 
 const sortOptions = {
@@ -21,19 +18,11 @@ const orderOptions = {
 
 const Repos = ({
   repos = [],
+  reposCount = 0,
   isReposReady = false,
+  prevSearch = {},
   onGetSearchRepos = () => {},
 }) => {
-  const [
-    { prevSearchText, prevSearchSort, prevSearchOrder, prevSearchPage },
-    setState,
-  ] = useReducer((prevState, nextState) => ({ ...prevState, ...nextState }), {
-    prevSearchText: '',
-    prevSearchSort: '',
-    prevSearchOrder: '',
-    prevSearchPage: 1,
-  });
-
   const debounce = (fn = () => {}, delayMs = 500) => {
     return (...args) => {
       if (!!timer) {
@@ -43,95 +32,49 @@ const Repos = ({
     };
   };
 
-  const processString = (text = '') => {
-    return text.replace(specialCharsRegex, '').toLowerCase();
-  };
+  const searchText = async q => {
+    const processedQ = q.trim().toLowerCase();
 
-  const searchText = async text => {
-    const processedKeyword = processString(text);
-
-    if (processedKeyword !== prevSearchText) {
-      const res = await onGetSearchRepos({
-        text: processedKeyword,
-        sort: prevSearchSort,
-        order: prevSearchOrder,
-        page: 1,
-      });
-
-      if (res) {
-        setState({ prevSearchText: processedKeyword });
-      }
+    if (processedQ !== prevSearch.q) {
+      await onGetSearchRepos({ q: processedQ, page: 1 });
     }
   };
 
-  const changeSort = async (sort = null) => {
-    if (sort !== prevSearchSort) {
-      const res = await onGetSearchRepos({
-        text: prevSearchText,
+  const changeSort = (sort = null) => {
+    if (sort !== prevSearch.sort) {
+      onGetSearchRepos({
         sort,
-        order: prevSearchOrder,
+        order: !sort ? '' : prevSearch.order,
         page: 1,
       });
-
-      // if (res) {
-      setState({
-        prevSearchSort: sort,
-        prevSearchOrder: !sort ? '' : prevSearchOrder,
-      });
-      // }
     }
   };
 
-  const changeOrder = async (order = null) => {
-    if (order !== prevSearchOrder) {
-      const res = await onGetSearchRepos({
-        text: prevSearchText,
-        sort: prevSearchSort,
-        order,
-        page: 1,
-      });
-
-      // if (res) {
-      setState({ prevSearchOrder: order });
-      // }
+  const changeOrder = (order = null) => {
+    if (!!prevSearch.sort && order !== prevSearch.order) {
+      onGetSearchRepos({ order, page: 1 });
     }
   };
-  const changePage = async (page = null) => {
-    if (page !== prevSearchPage) {
-      const res = await onGetSearchRepos({
-        text: prevSearchText,
-        sort: prevSearchSort,
-        order: prevSearchOrder,
-        page,
-      });
 
-      if (res) {
-        setState({ prevSearchPage: page });
-      }
+  const changePage = (page = null) => {
+    if (page !== prevSearch.page) {
+      onGetSearchRepos({ page });
     }
   };
 
   const scrollPage = e => {
-    console.log(
-      'scroll',
-      e.target.clientHeight,
-      e.target.scrollHeight,
-      e.target.scrollTop
-    );
+    const { clientHeight, scrollHeight, scrollTop } = e.target;
+
+    if (isReposReady && clientHeight + scrollTop > scrollHeight - 5) {
+      changePage(prevSearch.page + 1);
+    }
   };
-
-  // useEffect(() => {
-  //   window.addEventListener('scroll', scrollPage);
-
-  //   return () => {
-  //     window.removeEventListener('scroll', scrollPage);
-  //   };
-  // }, []);
 
   const selectDom = ({
     name = null,
     id = null,
     value = '',
+    placeholder = '',
     options = {},
     isDefaultChecked = false,
     isDisabled = false,
@@ -144,7 +87,9 @@ const Repos = ({
       disabled={isDisabled}
       onChange={onChange}
     >
-      {!isDefaultChecked && <option value="">Select...</option>}
+      {!isDefaultChecked && (
+        <option value="">{placeholder || 'Select...'}</option>
+      )}
       {Object.keys(options).map((optionKey, optionIdx) => (
         <option
           key={optionIdx}
@@ -161,31 +106,39 @@ const Repos = ({
   return (
     <div id="container" className={styles.Container}>
       <div className={styles.Top}>
-        <Search
-          placeholder="Search..."
-          onInput={e => {
-            debounce(searchText)(e.target.value);
-          }}
-        />
-        {selectDom({
-          name: 'sort',
-          id: 'search-sort',
-          value: prevSearchSort,
-          options: sortOptions,
-          onChange: e => changeSort(e.target.value),
-        })}
-        {selectDom({
-          name: 'order',
-          id: 'search-order',
-          value: prevSearchOrder,
-          options: orderOptions,
-          isDefaultChecked: true,
-          isDisabled: !prevSearchSort,
-          onChange: e => changeOrder(e.target.value),
-        })}
+        <div className={styles.Search}>
+          <Search
+            placeholder="Search..."
+            onInput={e => {
+              debounce(searchText)(e.target.value);
+            }}
+          />
+          {selectDom({
+            name: 'sort',
+            id: 'search-sort',
+            value: prevSearch.sort,
+            placeholder: 'Sort by...',
+            options: sortOptions,
+            onChange: e => changeSort(e.target.value),
+          })}
+          {selectDom({
+            name: 'order',
+            id: 'search-order',
+            value: prevSearch.order,
+            options: orderOptions,
+            isDefaultChecked: true,
+            isDisabled: !prevSearch.sort,
+            onChange: e => changeOrder(e.target.value),
+          })}
+        </div>
+        <div className={styles.Count}>Total: {reposCount}</div>
       </div>
-      <div className={styles.Table} onScroll={scrollPage}>
-        <ReposTable isLoading={!isReposReady} repos={repos} />
+      <div className={styles.Table}>
+        <ReposTable
+          repos={repos}
+          isLoading={!isReposReady}
+          onScroll={scrollPage}
+        />
       </div>
     </div>
   );

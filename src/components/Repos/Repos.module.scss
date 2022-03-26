@@ -1,14 +1,11 @@
-.Container {
-  > div {
-    display: flex;
-
-    &:not(:first-child) {
-      margin-top: 1rem;
-    }
-  }
+.Container > .Top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
-.Container > .Top {
+.Container > .Top > .Search {
+  display: flex;
   width: 20vw;
   min-width: 300px;
 
@@ -34,7 +31,14 @@
   }
 }
 
+.Container > .Top > .Count {
+  font-weight: 600;
+  color: #4a4a4a;
+}
+
 .Container > .Table {
   flex: 1;
+  display: flex;
+  margin-top: 1rem;
   overflow: auto;
 }

@@ -11,22 +11,34 @@
 .Cell {
   &:first-child {
     flex: 1 0 20%;
+    font-weight: 600;
   }
 
   &:nth-child(2) {
-    flex: 1 1 60%;
+    flex: 1 1 45%;
   }
 
   &:nth-child(3) {
-    flex: 1 0 20%;
+    flex: 1 0 10%;
+  }
+
+  &:nth-child(4) {
+    flex: 1 0 15%;
+  }
+
+  &:nth-child(5) {
+    flex: 1 0 5%;
+  }
+
+  &:nth-child(6) {
+    flex: 1 0 5%;
   }
 }
 
-.Message {
+.Loading {
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 100%;
   font-weight: 600;
   color: #828282;
 }
