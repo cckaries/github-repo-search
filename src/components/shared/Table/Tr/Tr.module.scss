@@ -5,6 +5,10 @@
   border-bottom: 1px solid #ced4da;
   overflow: hidden;
 
+  &:last-child {
+    border-bottom: 0;
+  }
+
   &.clickable {
     cursor: pointer;
 
