@@ -36,6 +36,11 @@
   color: #4a4a4a;
 }
 
+.Container > .Error {
+  margin-top: 0.5rem;
+  color: red;
+}
+
 .Container > .Table {
   flex: 1;
   display: flex;
