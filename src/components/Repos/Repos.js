@@ -1,3 +1,5 @@
+import { useReducer } from 'react';
+
 import styles from './Repos.module.scss';
 import ReposTable from './ReposTable/ReposTable';
 import Search from '../shared/Search/Search';
@@ -23,6 +25,13 @@ const Repos = ({
   prevSearch = {},
   onGetSearchRepos = () => {},
 }) => {
+  const [{ updatedAt }, setState] = useReducer(
+    (prevState, nextState) => ({ ...prevState, ...nextState }),
+    {
+      updatedAt: null,
+    }
+  );
+
   const debounce = (fn = () => {}, delayMs = 500) => {
     return (...args) => {
       if (!!timer) {
@@ -36,12 +45,14 @@ const Repos = ({
     const processedQ = q.trim().toLowerCase();
 
     if (processedQ !== prevSearch.q) {
+      setState({ updatedAt: Date.now() });
       await onGetSearchRepos({ q: processedQ, page: 1 });
     }
   };
 
   const changeSort = (sort = null) => {
     if (sort !== prevSearch.sort) {
+      setState({ updatedAt: Date.now() });
       onGetSearchRepos({
         sort,
         order: !sort ? '' : prevSearch.order,
@@ -52,6 +63,7 @@ const Repos = ({
 
   const changeOrder = (order = null) => {
     if (!!prevSearch.sort && order !== prevSearch.order) {
+      setState({ updatedAt: Date.now() });
       onGetSearchRepos({ order, page: 1 });
     }
   };
@@ -136,6 +148,7 @@ const Repos = ({
       <div className={styles.Table}>
         <ReposTable
           repos={repos}
+          updatedAt={updatedAt}
           isLoading={!isReposReady}
           onScroll={scrollPage}
         />

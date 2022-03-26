@@ -1,4 +1,4 @@
-import { useEffect, useReducer } from 'react';
+import { useEffect, useRef } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { format, parseISO } from 'date-fns';
 
@@ -10,16 +10,29 @@ import Tr from '../../shared/Table/Tr/Tr';
 import Th from '../../shared/Table/Th/Th';
 import Td from '../../shared/Table/Td/Td';
 
-const ReposTable = ({ repos = [], isLoading = false, onScroll = () => {} }) => {
+const ReposTable = ({
+  repos = [],
+  updatedAt = null,
+  isLoading = false,
+  onScroll = () => {},
+}) => {
+  const tbodyRef = useRef(null);
+
+  useEffect(() => {
+    if (!!updatedAt) {
+      tbodyRef.current.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  }, [updatedAt]);
+
   const loadingDom = (
     <Tr customClass={styles.Loading}>
       <td>Loading...</td>
     </Tr>
   );
 
-  const reposDom = repos.map(repo => (
+  const reposDom = repos.map((repo, repoIdx) => (
     <Tr
-      key={`${repo.id}-${repo.updated_at}`}
+      key={repoIdx}
       isClickable
       onClick={() => window.open(repo.html_url, '_blank')}
     >
@@ -51,7 +64,7 @@ const ReposTable = ({ repos = [], isLoading = false, onScroll = () => {} }) => {
             </Th>
           </Tr>
         </Thead>
-        <Tbody onScroll={onScroll}>
+        <Tbody ref={tbodyRef} onScroll={onScroll}>
           {reposDom}
           {isLoading && loadingDom}
         </Tbody>
