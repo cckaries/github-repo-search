@@ -1,5 +1,3 @@
-import { useReducer, memo } from 'react';
-
 import styles from './Repos.module.scss';
 import ReposTable from './ReposTable/ReposTable';
 import Search from '../shared/Search/Search';
@@ -28,107 +26,91 @@ const debounce = (fn = () => {}, delayMs = 500) => {
   };
 };
 
-const Repos = memo(
-  ({
-    reposCount = 0,
-    isReposLoading = false,
-    prevSearch = {},
-    searchError = null,
-    onGetSearchRepos = () => {},
-  }) => {
-    const [{ updatedAt }, setState] = useReducer(
-      (prevState, nextState) => ({ ...prevState, ...nextState }),
-      {
-        updatedAt: null,
-      }
-    );
+const Repos = ({
+  reposCount = 0,
+  isReposLoading = false,
+  prevSearch = {},
+  searchError = null,
+  onGetSearchRepos = () => {},
+}) => {
+  const searchText = async q => {
+    const processedQ = q.trim().toLowerCase();
 
-    const searchText = async q => {
-      const processedQ = q.trim().toLowerCase();
+    if (processedQ !== prevSearch.q) {
+      await onGetSearchRepos({ q: processedQ, page: 1 });
+    }
+  };
 
-      if (processedQ !== prevSearch.q) {
-        setState({ updatedAt: Date.now() });
-        await onGetSearchRepos({ q: processedQ, page: 1 });
-      }
-    };
+  const changeSort = (sort = null) => {
+    if (sort !== prevSearch.sort) {
+      onGetSearchRepos({
+        sort,
+        order: !sort ? '' : prevSearch.order,
+        page: 1,
+      });
+    }
+  };
 
-    const changeSort = (sort = null) => {
-      if (sort !== prevSearch.sort) {
-        setState({ updatedAt: Date.now() });
-        onGetSearchRepos({
-          sort,
-          order: !sort ? '' : prevSearch.order,
-          page: 1,
-        });
-      }
-    };
+  const changeOrder = (order = null) => {
+    if (!!prevSearch.sort && order !== prevSearch.order) {
+      onGetSearchRepos({ order, page: 1 });
+    }
+  };
 
-    const changeOrder = (order = null) => {
-      if (!!prevSearch.sort && order !== prevSearch.order) {
-        setState({ updatedAt: Date.now() });
-        onGetSearchRepos({ order, page: 1 });
-      }
-    };
+  const changePage = (page = null) => {
+    if (page !== prevSearch.page) {
+      onGetSearchRepos({ page });
+    }
+  };
 
-    const changePage = (page = null) => {
-      if (page !== prevSearch.page) {
-        onGetSearchRepos({ page });
-      }
-    };
+  const scrollPage = e => {
+    const { clientHeight, scrollHeight, scrollTop } = e.target;
 
-    const scrollPage = e => {
-      const { clientHeight, scrollHeight, scrollTop } = e.target;
+    if (
+      !searchError &&
+      !isReposLoading &&
+      clientHeight + scrollTop > scrollHeight - 5
+    ) {
+      changePage(prevSearch.page + 1);
+    }
+  };
 
-      if (
-        !searchError &&
-        !isReposLoading &&
-        clientHeight + scrollTop > scrollHeight - 5
-      ) {
-        changePage(prevSearch.page + 1);
-      }
-    };
-
-    return (
-      <div id="container" className={styles.Container}>
-        <div className={styles.Top}>
-          <div className={styles.Search}>
-            <Search
-              placeholder="Search..."
-              onInput={e => {
-                debounce(searchText)(e.target.value);
-              }}
-            />
-            <Select
-              name="sort"
-              id="search-sort"
-              value={prevSearch.sort}
-              placeholder={'Sort by...'}
-              options={sortOptions}
-              onChange={e => changeSort(e.target.value)}
-            />
-            <Select
-              name={'order'}
-              id={'search-order'}
-              value={prevSearch.order}
-              options={orderOptions}
-              isDefaultChecked={true}
-              isDisabled={!prevSearch.sort}
-              onChange={e => changeOrder(e.target.value)}
-            />
-          </div>
-          <div className={styles.Count}>Total: {reposCount}</div>
-        </div>
-        {!!searchError && <div className={styles.Error}>{searchError}</div>}
-        <div className={styles.Table}>
-          <ReposTable
-            updatedAt={updatedAt}
-            isLoading={isReposLoading}
-            onScroll={scrollPage}
+  return (
+    <div id="container" className={styles.Container}>
+      <div className={styles.Top}>
+        <div className={styles.Search}>
+          <Search
+            placeholder="Search..."
+            onInput={e => {
+              debounce(searchText)(e.target.value);
+            }}
+          />
+          <Select
+            name="sort"
+            id="search-sort"
+            value={prevSearch.sort}
+            placeholder={'Sort by...'}
+            options={sortOptions}
+            onChange={e => changeSort(e.target.value)}
+          />
+          <Select
+            name={'order'}
+            id={'search-order'}
+            value={prevSearch.order}
+            options={orderOptions}
+            isDefaultChecked={true}
+            isDisabled={!prevSearch.sort}
+            onChange={e => changeOrder(e.target.value)}
           />
         </div>
+        <div className={styles.Count}>Total: {reposCount}</div>
       </div>
-    );
-  }
-);
+      {!!searchError && <div className={styles.Error}>{searchError}</div>}
+      <div className={styles.Table}>
+        <ReposTable onScroll={scrollPage} />
+      </div>
+    </div>
+  );
+};
 
 export default Repos;
