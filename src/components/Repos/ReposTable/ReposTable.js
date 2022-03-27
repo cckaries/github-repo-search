@@ -1,5 +1,4 @@
 import { useEffect, useRef } from 'react';
-import { useSelector } from 'react-redux';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { format, parseISO } from 'date-fns';
 
@@ -15,10 +14,12 @@ const scrollTop = componentRef => {
   componentRef.current.scrollTo({ top: 0, behavior: 'smooth' });
 };
 
-const ReposTable = ({ onScroll = () => {} }) => {
-  const { repos, prevSearch, isReposLoading } = useSelector(
-    state => state.repos
-  );
+const ReposTable = ({
+  repos = [],
+  prevSearch = {},
+  isLoading = false,
+  onScroll = () => {},
+}) => {
   const tbodyRef = useRef(null);
 
   useEffect(() => {
@@ -74,7 +75,7 @@ const ReposTable = ({ onScroll = () => {} }) => {
         </Thead>
         <Tbody ref={tbodyRef} onScroll={onScroll}>
           {reposDom}
-          {isReposLoading && loadingDom}
+          {isLoading && loadingDom}
         </Tbody>
       </Table>
     </div>

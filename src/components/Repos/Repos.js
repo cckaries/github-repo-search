@@ -27,6 +27,7 @@ const debounce = (fn = () => {}, delayMs = 500) => {
 };
 
 const Repos = ({
+  repos = [],
   reposCount = 0,
   isReposLoading = false,
   prevSearch = {},
@@ -67,6 +68,7 @@ const Repos = ({
     const { clientHeight, scrollHeight, scrollTop } = e.target;
 
     if (
+      !!repos.length &&
       !searchError &&
       !isReposLoading &&
       clientHeight + scrollTop > scrollHeight - 5
@@ -107,7 +109,7 @@ const Repos = ({
       </div>
       {!!searchError && <div className={styles.Error}>{searchError}</div>}
       <div className={styles.Table}>
-        <ReposTable onScroll={scrollPage} />
+        <ReposTable repos={repos} prevSearch={prevSearch} isLoading={isReposLoading} onScroll={scrollPage} />
       </div>
     </div>
   );
