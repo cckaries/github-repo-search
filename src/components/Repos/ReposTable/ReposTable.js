@@ -11,6 +11,10 @@ import Tr from '../../shared/Table/Tr/Tr';
 import Th from '../../shared/Table/Th/Th';
 import Td from '../../shared/Table/Td/Td';
 
+const scrollTop = componentRef => {
+  componentRef.current.scrollTo({ top: 0, behavior: 'smooth' });
+};
+
 const ReposTable = ({ onScroll = () => {} }) => {
   const { repos, prevSearch, isReposLoading } = useSelector(
     state => state.repos
@@ -19,7 +23,7 @@ const ReposTable = ({ onScroll = () => {} }) => {
 
   useEffect(() => {
     if (!!repos.length && prevSearch.page === 1) {
-      tbodyRef.current.scrollTo({ top: 0, behavior: 'smooth' });
+      scrollTop(tbodyRef);
     }
   }, [prevSearch.page]);
 
@@ -50,7 +54,11 @@ const ReposTable = ({ onScroll = () => {} }) => {
   return (
     <div className={styles.Container}>
       <Table>
-        <Thead>
+        <Thead
+          onClick={() => {
+            scrollTop(tbodyRef);
+          }}
+        >
           <Tr>
             <Th customClass={styles.Cell}>Name</Th>
             <Th customClass={styles.Cell}>Description</Th>
