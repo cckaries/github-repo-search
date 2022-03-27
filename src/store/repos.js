@@ -73,13 +73,14 @@ export const getSearchReposThunk = (payload = {}) => {
     };
 
     try {
-      const resJson = await getSearchRepos();
       dispatch(reposActions.setPrevSearch(payload));
       dispatch(reposActions.setSearchError(null));
+      const resJson = await getSearchRepos();
       if (!!resJson) {
         dispatch(reposActions.setRepos(resJson));
       }
     } catch (err) {
+      dispatch(reposActions.setPrevSearch(repos.prevSearch));
       dispatch(reposActions.setSearchError(err.message));
     } finally {
       dispatch(reposActions.setIsReposLoading(false));
